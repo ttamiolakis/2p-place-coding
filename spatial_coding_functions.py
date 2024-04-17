@@ -1,4 +1,5 @@
 def event_numbers(data,threshold,max_distance):
+    from scipy.signal import find_peaks
     peaks, _=find_peaks(data, height=threshold,distance=max_distance)
 
     return data.iloc[peaks]
