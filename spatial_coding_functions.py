@@ -27,3 +27,5 @@ def make_firing_rate_maps(data,num_rounds,num_units,num_bins):
             firing_rate_maps[cell, round_num - 1] = avg_firing_rate_map
 
     return firing_rate_maps
+
+def calcium_trace(data,cell_number):
