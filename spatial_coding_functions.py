@@ -28,4 +28,4 @@ def make_firing_rate_maps(data,num_rounds,num_units,num_bins):
 
     return firing_rate_maps
 
-def calcium_trace(data,cell_number):
+#def calcium_trace(data,cell_number):
