@@ -1,11 +1,14 @@
-def event_numbers(data,threshold,max_distance):
-    from scipy.signal import find_peaks
+from scipy.signal import find_peaks
+import numpy as np
+from skimage.feature import peak_local_max
+
+def event_numbers(data,threshold,max_distance):    
     peaks, _=find_peaks(data, height=threshold,distance=max_distance)
 
     return data.iloc[peaks]
 
-def make_firing_rate_maps(data,num_rounds,num_units,num_bins):
-    import numpy as np
+
+def make_firing_rate_maps(data,num_rounds,num_units,num_bins):    
     # Initialize a 3-dimensional array to store firing rate maps for each cell and round
     firing_rate_maps = np.zeros((int(num_units), num_rounds, num_bins))
 
@@ -28,4 +31,15 @@ def make_firing_rate_maps(data,num_rounds,num_units,num_bins):
 
     return firing_rate_maps
 
+#taking the zscore flurorescence. finding the peaks in it and making a binary panda frame out of it.
+#meaning with 0 and 1. zero is events and 1 is events
+
+def make_binary(data,peak_threshold=3,peak_distance=10):
+        #the data file will be the the firing rate map of every cell
+        data_binarized=np.zeros_like(data) #making a copy of the original file
+        for unit in range(data.shape[0]):
+            peaks_all_data=peak_local_max(data,threshold_abs=peak_threshold,min_distance=peak_distance,exclude_border=False)
+            data_binarized[peaks_all_data[:, 0], peaks_all_data[:, 1]] = 1
+        return data_binarized
+        
 #def calcium_trace(data,cell_number):
