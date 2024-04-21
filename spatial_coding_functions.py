@@ -1,6 +1,8 @@
 from scipy.signal import find_peaks
 import numpy as np
 from skimage.feature import peak_local_max
+import random
+from scipy.stats import zscore,kstest
 
 def event_numbers(data,threshold,max_distance):    
     peaks, _=find_peaks(data, height=threshold,distance=max_distance)
@@ -53,4 +55,29 @@ def make_binary(data,peak_threshold=3,peak_distance=10):
                  data_binarized[unit][round][peaks]=1
         return data_binarized
     
-#def calcium_trace(data,cell_number):
+# def ks_test_analysis(data,data_avg=None,n_shuffles=None,num_rounds=None,num_bins=None):
+#     shuffled_ks=[] #array where I will put the ks distances where I will compare the shuffled data with my first shuffling
+#     baseline=data.copy()
+
+#     #shuffle 1 for the baseline
+#     for i in range(num_rounds):
+#         shuf=random.randint(1,150)
+#         baseline[i]=np.roll(baseline[i],shuf)
+#     baseline_avg=np.mean(baseline,axis=0)
+    
+#     baseline_ks,_=kstest(data_avg,baseline_avg)
+
+
+#     # now I will shuffle many times and then compare
+        
+#     for n in range(1,shuffling_times):
+#         data_shuffle=data.copy()    
+#         for i in range(num_rounds):
+#             shuf=random.randint(1,150)
+#             data_shuffle[i]=np.roll(data_shuffle[i],shuf)
+        
+        
+
+#         data_shuffle=np.mean(data_shuffle,axis=0)
+#         ks_shuffle,p_value_=kstest(baseline_avg,data_shuffle)
+#         shuffled_ks.append(ks_shuffle)
