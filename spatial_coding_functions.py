@@ -5,6 +5,7 @@ import random
 from scipy.stats import zscore,kstest
 import h5py
 import pandas as pd
+import scipy.sparse 
 
 
 def event_numbers(data,threshold,max_distance):    
@@ -59,6 +60,7 @@ def make_binary(data,peak_threshold=3,peak_distance=10):
         return data_binarized
 
 def adding_parameters(zscore_fluo_pd,raw_fluo_pd,param_file):
+    
 
     # panda frame for time
     time_hdf=h5py.File(param_file)['inferred']['belt_dict']['tsscn']
@@ -89,12 +91,28 @@ def adding_parameters(zscore_fluo_pd,raw_fluo_pd,param_file):
     zscore_fluo_pd = pd.concat([zscore_fluo_pd, time_hdf, distance_hdf, speed_hdf, rounds_hdf, running_hdf], axis=1, ignore_index=True)
     raw_fluo_pd= pd.concat([raw_fluo_pd, time_hdf, distance_hdf, speed_hdf, rounds_hdf, running_hdf], axis=1, ignore_index=True)
     # Create a mapping dictionary for column renaming
-    rename_mapping = {old_col: new_col for old_col, new_col in zip(fluo_hdf_r.columns[-5:], ['Time (ms)', 'Distance', 'Speed', 'Rounds', 'Running'])}
+    rename_mapping = {old_col: new_col for old_col, new_col in zip(zscore_fluo_pd.columns[-5:], ['Time (ms)', 'Distance', 'Speed', 'Rounds', 'Running'])}
     # Rename the columns
     zscore_fluo_pd = zscore_fluo_pd.rename(columns=rename_mapping)
     raw_fluo_pd=raw_fluo_pd.rename(columns=rename_mapping)
 
     return zscore_fluo_pd,raw_fluo_pd
+
+def cell_morphology(dataset,cell_number):
+     #opening the hpf5 file
+    hdf=h5py.File(dataset)
+    #defining the spatial parameters
+    A_data=hdf['estimates']['A']['data']
+    A_indices=hdf['estimates']['A']['indices']
+    A_indptr=hdf['estimates']['A']['indptr']
+    A_shape=hdf['estimates']['A']['shape']
+    #number of neurons
+    n_neurons=len(hdf['estimates']['C'])
+    spatial = scipy.sparse.csc.csc_matrix((A_data, A_indices, A_indptr),shape=A_shape).todense()
+    spatial = np.array(spatial)  # change type to allow np.reshape (?)
+    spatial = np.reshape(spatial[:,cell_number], (512, 512)) # (262144 -> 512x512, i.e. "unflatten")
+
+    return spatial
 
 
 
