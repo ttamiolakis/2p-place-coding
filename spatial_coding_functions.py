@@ -3,6 +3,9 @@ import numpy as np
 from skimage.feature import peak_local_max
 import random
 from scipy.stats import zscore,kstest
+import h5py
+import pandas as pd
+
 
 def event_numbers(data,threshold,max_distance):    
     peaks, _=find_peaks(data, height=threshold,distance=max_distance)
@@ -54,6 +57,49 @@ def make_binary(data,peak_threshold=3,peak_distance=10):
                  peaks, _=find_peaks(data_per_round, height=peak_threshold,distance=peak_distance)
                  data_binarized[unit][round][peaks]=1
         return data_binarized
+
+def adding_parameters(zscore_fluo_pd,raw_fluo_pd,param_file):
+
+    # panda frame for time
+    time_hdf=h5py.File(param_file)['inferred']['belt_dict']['tsscn']
+    time_hdf=pd.DataFrame(time_hdf)
+    time_hdf.columns=['Time (ms)']
+    #panda frame for distance
+    distance_hdf=h5py.File(param_file)['inferred']['belt_scn_df']['distance']
+    distance_hdf=pd.DataFrame(distance_hdf)
+    distance_hdf.columns=['Distance']
+    # panda frame for speed
+    speed_hdf=h5py.File(param_file)['inferred']['belt_scn_df']['speed']
+    speed_hdf=pd.DataFrame(speed_hdf)
+    speed_hdf.columns=['Speed']
+    # panda frame for number of rounds
+    rounds_hdf=h5py.File(param_file)['inferred']['belt_scn_df']['rounds']
+    rounds_hdf=pd.DataFrame(rounds_hdf)
+    rounds_hdf.columns=['Rounds']
+    rounds_hdf=rounds_hdf.astype(int)
+    # panda frame for running(yes or no running)
+    running_hdf=h5py.File(param_file)['inferred']['belt_scn_df']['running']
+    running_hdf=pd.DataFrame(running_hdf)
+    running_hdf.columns=['Running']
+    running_hdf=running_hdf.astype(int)
+
+    #####################################################################################################################
+
+    #adding all the parameters in one panda frame for z score and raw data
+    zscore_fluo_pd = pd.concat([zscore_fluo_pd, time_hdf, distance_hdf, speed_hdf, rounds_hdf, running_hdf], axis=1, ignore_index=True)
+    raw_fluo_pd= pd.concat([raw_fluo_pd, time_hdf, distance_hdf, speed_hdf, rounds_hdf, running_hdf], axis=1, ignore_index=True)
+    # Create a mapping dictionary for column renaming
+    rename_mapping = {old_col: new_col for old_col, new_col in zip(fluo_hdf_r.columns[-5:], ['Time (ms)', 'Distance', 'Speed', 'Rounds', 'Running'])}
+    # Rename the columns
+    zscore_fluo_pd = zscore_fluo_pd.rename(columns=rename_mapping)
+    raw_fluo_pd=raw_fluo_pd.rename(columns=rename_mapping)
+
+    return zscore_fluo_pd,raw_fluo_pd
+
+
+
+     
+     
     
 # def ks_test_analysis(data,data_avg=None,n_shuffles=None,num_rounds=None,num_bins=None):
 #     shuffled_ks=[] #array where I will put the ks distances where I will compare the shuffled data with my first shuffling
