@@ -98,7 +98,7 @@ def adding_parameters(zscore_fluo_pd,raw_fluo_pd,param_file):
 
     return zscore_fluo_pd,raw_fluo_pd
 
-def cell_morphology(dataset,cell_number):
+def cell_morphology(dataset):
      #opening the hpf5 file
     hdf=h5py.File(dataset)
     #defining the spatial parameters
@@ -110,7 +110,7 @@ def cell_morphology(dataset,cell_number):
     n_neurons=len(hdf['estimates']['C'])
     spatial = scipy.sparse.csc.csc_matrix((A_data, A_indices, A_indptr),shape=A_shape).todense()
     spatial = np.array(spatial)  # change type to allow np.reshape (?)
-    spatial = np.reshape(spatial[:,cell_number], (512, 512)) # (262144 -> 512x512, i.e. "unflatten")
+    #spatial = np.reshape(spatial[:,cell_number], (512, 512)) # (262144 -> 512x512, i.e. "unflatten")
 
     return spatial
 
