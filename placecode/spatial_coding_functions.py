@@ -10,7 +10,6 @@ import scipy.sparse
 
 def event_numbers(data, threshold, max_distance):
     peaks, _ = find_peaks(data, height=threshold, distance=max_distance)
-
     return data.iloc[peaks]
 
 
@@ -19,6 +18,8 @@ def make_firing_rate_maps(data, num_rounds, num_units, num_bins):
     firing_rate_maps = np.zeros((int(num_units), num_rounds, num_bins))
 
     for cell in range(num_units):
+        # FIXME: what if, for example, rounds 0, 1, 3, 4 are included, and round 2 was filtered out?
+        # FIXME: can speed up if filtering for round happens first. Right now, same filtering for round is done for each cell
         for round_num in range(1, num_rounds + 1):
             # Filter data for the current round and cell
             round_data = data[data['Rounds'] == round_num]
@@ -38,6 +39,51 @@ def make_firing_rate_maps(data, num_rounds, num_units, num_bins):
             # Store the average firing rate map in the firing_rate_maps array
             firing_rate_maps[cell, round_num - 1] = avg_firing_rate_map
 
+    return firing_rate_maps
+
+
+def firing_rate_map(unit_traces: np.array, lv_rounds: np.array, lv_distance: np.array, n_bins: int) -> np.array:
+    """Calculates the spatial firing rate map for an arbitrary trace.
+    Parameters
+    ----------
+    unit_traces : np.array(shape=(n_cells, n_frames))
+        A numpy array of 1D arbitrary traces for each neuron. Example: temporal components (raw or z-score).
+    lv_rounds : np.array(shape=(n_frames,), dtype=np.int16)
+        1D numpy array that marks the number of finished rounds for each frame
+    lv_distance : np.array(shape=(n_frames,), dtype=np.float64)
+        1D numpy array of the distance per round quantity.
+    n_bins : int
+        the number of spatial bins to calculate
+    Returns
+    -------
+    np.array(shape=(n_components, n_rounds, n_bins))
+        A 3D array that contains for each component, for each round, the firing rate corresponding to each spatial bin.
+    """
+    # make sure filtering was done correctly, i.e. frames of traces match with frames of loco data
+    assert unit_traces.shape[1] == len(lv_rounds)
+    assert len(lv_rounds) == len(lv_distance)
+
+    n_units = unit_traces.shape[0]
+
+    # get all unique rounds included in the data
+    rounds_to_include = np.unique(lv_rounds)
+    n_rounds = len(rounds_to_include)
+
+    firing_rate_maps = np.zeros(
+        shape=(n_units, n_rounds, n_bins), dtype=np.float64)
+    for i_round, round in enumerate(rounds_to_include):
+        frames_current_round = lv_rounds == round
+        distance_current_round = lv_distance[frames_current_round]
+        traces_current_round = unit_traces[:, frames_current_round]
+        for i_unit in range(n_units):
+            hist, _ = np.histogram(
+                distance_current_round, bins=n_bins, weights=traces_current_round[i_unit])
+            count_hist, _ = np.histogram(distance_current_round, bins=n_bins)
+
+            avg_firing_rate_map = np.divide(
+                hist, count_hist, out=np.zeros_like(hist), where=(count_hist != 0), dtype=firing_rate_maps.dtype)
+            avg_firing_rate_map[np.isnan(avg_firing_rate_map)] = 0
+            firing_rate_maps[i_unit, i_round, :] = avg_firing_rate_map
     return firing_rate_maps
 
 # taking the zscore flurorescence. finding the peaks in it and making a binary panda frame out of it.
