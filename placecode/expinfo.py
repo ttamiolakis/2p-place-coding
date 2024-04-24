@@ -3,6 +3,7 @@ import os
 import errno
 from uuid import uuid4
 import warnings
+from math import ceil
 
 
 class ParameterNotFoundError(Exception):
@@ -11,6 +12,9 @@ class ParameterNotFoundError(Exception):
 
 class ExpInfo():
     # TODO add proper documentation
+    # TODO: some parameters (belt_length_mm, for example) can be read out from the Matlab matching parameters
+    # TODO: move some parameters into an experimental protocol class?
+    # TODO: decide how to handle
     """
     Attributes:
 
@@ -20,11 +24,17 @@ class ExpInfo():
     fpath_loco: str, the file path of the locomotion data (hdf5 file)
     mouse_ID: str, mouse ID
     condition: str, condition
+    belt_length_mm: float, the length of the belt in mm
 
     Optional:
     uuid: str, the hexadecimal form of the experiment identifier
     exp_type: str, the experiment type
     fpath_lfp: str, the file path of the LFP file (abf file)
+    n_bins: int, the desired number of spatial bins. Calculated from belt_length_mm and bin_size 
+        if bin_size is given. If both n_bins and bin_size given, uses n_bins.
+    bin_size: float, the desired spatial bin size in mm. Calculated from belt_length_mm and n_bins 
+        if n_bins is given. If both n_bins and bin_size given, uses n_bins.
+
     """
 
     def __init__(self, fpath_json: str):
@@ -83,6 +93,13 @@ class ExpInfo():
         else:
             raise ParameterNotFoundError(
                 f"parameter fpath_loco (locomotion hdf5 data) not found in json file {fpath_json}")
+
+        if "belt_length_mm" in dict_json:
+            self.belt_length_mm = dict_json["belt_length_mm"]
+        else:
+            raise ParameterNotFoundError(
+                f"parameter belt_length_mm (belt total length in mm) not found in json file {fpath_json}")
+
         # read optional parameters
         if "uuid" in dict_json:
             self.uuid = dict_json["uuid"]
@@ -98,3 +115,21 @@ class ExpInfo():
             self.fpath_lfp = dict_json["fpath_lfp"]
         else:
             self.fpath_lfp = None
+        if "n_bins" in dict_json:
+            self.n_bins = int(dict_json["n_bins"])
+            self.bin_size = self.belt_length_mm / self.n_bins
+            if self.belt_length_mm % self.n_bins != 0:
+                self.bin_size += 1
+            print(
+                f"bin size set to {self.bin_size} (belt length {self.belt_length_mm} mm, n_bins {self.n_bins})")
+        elif "bin_size" in dict_json:  # no n_bins provided, try to infer
+            self.bin_size = dict_json["bin_size"]
+            # if belt length / bin size not an integer, round up to cover whole belt with bins. Last belt will be smaller then
+            self.n_bins = ceil(self.belt_length_mm / self.bin_size)
+            warnings.warn(
+                f"Cannot divide up belt length of {self.belt_length_mm} mm into bins of {self.bin_size} mm! Last bin will have size {self.belt_length_mm % self.bin_size}")
+            print(
+                f"n_bins set to {self.n_bins} (belt length {self.belt_length_mm} mm, bin size {self.bin_size} mm)")
+        else:  # neither n_bins nor bin_size is given
+            raise ParameterNotFoundError(
+                "Either n_bins or bin_size should be given (for spatial binning)!")
