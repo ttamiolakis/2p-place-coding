@@ -107,22 +107,58 @@ def adding_parameters(zscore_fluo_pd, raw_fluo_pd, param_file):
     return zscore_fluo_pd, raw_fluo_pd
 
 
+def read_spatial(A_data, A_indices, A_indptr, A_shape, n_components, resolution, unflatten: bool = False) -> np.array:
+    """Given the numpy arrays data, indices, indptr, shape, read the sparse encoded spatial component data and
+    reshape it into (n_components, resolution_x, resolution_y)
+
+    Parameters
+    ----------
+    A_data : np.array
+        The data field of the sparse encoding
+    A_indices : np.array
+        The indices field of the sparse encoding
+    A_indptr : np.array
+        The indptr field of the sparse encoding
+    A_shape : np.array
+        The shape field of the sparse encoding
+    n_components : int
+        the number of components in the CaImAn data
+    resolution : tuple(int, int), or [int, int], or np.array(shape=(2,), dtype=dtype("int32"))
+        the resolution of the 2p recording. It should be read out from CaImAn dims.
+    unflatten : bool
+        default: False. If True, the individual spatial components will be converted into 2d arrays. If False,
+        left as 1d/flat numpy arrays.
+    Returns
+    -------
+    np.array of shape (n_components, resolution_x * resolution_y ) if unflatten=False, else (n_components, *resolution) 
+        The dense matrix form of the spatial components. 
+    """
+    spatial = scipy.sparse.csc.csc_matrix(
+        (A_data, A_indices, A_indptr), shape=A_shape).todense()  # returns array with dimensions (flat resolution, n_components)
+    spatial = np.array(spatial)  # change type to numpy array
+    # (262144 -> 512x512, i.e. "unflatten" along imaging resolution)
+    spatial = np.swapaxes(spatial, 0, 1)
+    if unflatten:
+        # TODO: need to test if x and y are in correct order (for asymmetric resolution).
+        spatial = np.reshape(spatial, (n_components, *resolution))
+    return spatial
+
+
 def cell_morphology(dataset):
     # opening the hpf5 file
-    hdf = h5py.File(dataset)
-    # defining the spatial parameters
-    A_data = hdf['estimates']['A']['data']
-    A_indices = hdf['estimates']['A']['indices']
-    A_indptr = hdf['estimates']['A']['indptr']
-    A_shape = hdf['estimates']['A']['shape']
-    # number of neurons
-    n_neurons = len(hdf['estimates']['C'])
-    spatial = scipy.sparse.csc.csc_matrix(
-        (A_data, A_indices, A_indptr), shape=A_shape).todense()
-    spatial = np.array(spatial)  # change type to allow np.reshape (?)
-    # spatial = np.reshape(spatial[:,cell_number], (512, 512)) # (262144 -> 512x512, i.e. "unflatten")
-
-    return spatial
+    with h5py.File(dataset, "r") as hdf:
+        # defining the spatial parameters
+        A_data = hdf['estimates']['A']['data']
+        A_indices = hdf['estimates']['A']['indices']
+        A_indptr = hdf['estimates']['A']['indptr']
+        A_shape = hdf['estimates']['A']['shape']
+        # number of neurons
+        n_neurons = len(hdf['estimates']['C'])
+        spatial = scipy.sparse.csc.csc_matrix(
+            (A_data, A_indices, A_indptr), shape=A_shape).todense()
+        spatial = np.array(spatial)  # change type to numpy array
+        # spatial = np.reshape(spatial[:,cell_number], (512, 512)) # (262144 -> 512x512, i.e. "unflatten")
+        return spatial
 
 
 # def ks_test_analysis(data,data_avg=None,n_shuffles=None,num_rounds=None,num_bins=None):
