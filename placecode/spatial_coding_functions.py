@@ -1,10 +1,7 @@
-from scipy.signal import find_peaks
-import numpy as np
-from skimage.feature import peak_local_max
-import random
-from scipy.stats import zscore, kstest
 import h5py
+import numpy as np
 import pandas as pd
+from scipy.signal import find_peaks
 import scipy.sparse
 
 
