@@ -1,6 +1,6 @@
 {
-    "mouse_ID": "WEZ8917",
-    "home_folder":"C:\\Users\\Theodore Tamiolakis\\OneDrive\\PhD\\Lab",
+    "mouse_ID": "ABCD",
+    "home_folder":"C:\\path\\to\\your\\data\\folder",
     "condition": "24hr_poststim",
     "threshold": 3,
     "peak distance (moving window for peaks)": 10,
