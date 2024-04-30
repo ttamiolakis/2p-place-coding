@@ -1,0 +1,13 @@
+{
+    "mouse_ID": "ABCD",
+    "home_folder":"C:\\path\\to\\your\\data\\folder",
+    "condition": "24hr_poststim",
+    "threshold": 3,
+    "peak distance (moving window for peaks)": 10,
+    "peak_threshold":3,
+    "peak_distance":10,
+    "belt_length":150,
+    "shuffling_times":1000,
+    "n_events_thresholds":4,
+    "num_bins":150
+  }
