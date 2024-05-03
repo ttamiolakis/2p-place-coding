@@ -4,7 +4,7 @@ from math import ceil
 import os
 import warnings
 from uuid import uuid4
-
+from typing import Dict
 
 
 class ParameterNotFoundError(Exception):
@@ -197,6 +197,22 @@ class AnalysisParams():
         # Initialize generated parameters
         self.rounds_included = None
         self.n_units = None
+
+    def to_dict(self) -> Dict:
+        """
+        Returns the attributes as a dict.
+        """
+        dict_attrs = dict()
+        dict_attrs["peak_threshold"] = self.peak_threshold
+        dict_attrs["peak_distance"] = self.peak_distance
+        dict_attrs["n_events_threshold"] = self.n_events_threshold
+        dict_attrs["n_shuffle"] = self.n_shuffle
+        dict_attrs["n_bins"] = self.n_bins
+        dict_attrs["bin_size"] = self.bin_size
+        dict_attrs["rounds_included"] = self.rounds_included
+        dict_attrs["n_units"] = self.n_units
+        dict_attrs["peak_threshold"] = self.peak_threshold
+        return dict_attrs
 
     def read_exp_info(self, exp_info: ExpInfo) -> None:
         """Read out relevant experiment info from an ExpInfo object.
