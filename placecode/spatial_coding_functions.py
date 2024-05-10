@@ -115,6 +115,45 @@ def firing_rate_map(unit_traces: np.array, lv_rounds: np.array, lv_distance: np.
     return firing_rate_maps
 
 
+def spiking_rate_map(binary_traces: np.array, lv_rounds: np.array, lv_distance: np.array, n_bins: int) -> np.array:
+    """Calculates the spatial firing rate map for an arbitrary trace.
+    Parameters
+    ----------
+    binary_traces : np.array(shape=(n_cells, n_frames))
+        A numpy array of 1D binary traces (1 if a firing occurs, 0 otherwise)
+    lv_rounds : np.array(shape=(n_frames,), dtype=np.int16)
+        1D numpy array that marks the number of finished rounds for each frame
+    lv_distance : np.array(shape=(n_frames,), dtype=np.float64)
+        1D numpy array of the distance per round quantity.
+    n_bins : int
+        the number of spatial bins to calculate
+    Returns
+    -------
+    np.array(shape=(n_components, n_rounds, n_bins))
+        A 3D array that contains for each component, for each round, the firing rate corresponding to each spatial bin.
+    """
+    assert binary_traces.shape[1] == len(lv_rounds)
+    assert len(lv_rounds) == len(lv_distance)
+
+    n_units = binary_traces.shape[0]
+    # get all unique rounds included in the data
+    rounds_to_include = np.unique(lv_rounds)
+    n_rounds = len(rounds_to_include)
+
+    firing_rate_maps = np.zeros(
+        shape=(n_units, n_rounds, n_bins), dtype=np.float64)
+    for i_round, round in enumerate(rounds_to_include):
+        # filter traces to current round
+        frames_current_round = lv_rounds == round
+        distance_current_round = lv_distance[frames_current_round]
+        traces_current_round = binary_traces[:, frames_current_round]
+        for i_unit in range(n_units):
+            idx_firing = np.nonzero(traces_current_round[i_unit])
+            firing_spots = distance_current_round[idx_firing]
+            firing_rate_hist, _ = np.histogram(
+                firing_spots, bins=n_bins, range=(0, 1500.))
+            firing_rate_maps[i_unit, i_round, :] = firing_rate_hist
+    return firing_rate_maps
 # taking the zscore flurorescence. finding the peaks in it and making a binary panda frame out of it.
 # meaning with 0 and 1. zero is events and 1 is events
 
