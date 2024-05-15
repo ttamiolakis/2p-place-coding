@@ -1,0 +1,19 @@
+{
+    "name": "2p-place-coding",
+	"context": ".",
+	"dockerFile": "Dockerfile",
+    "runArgs": ["--env=DISPLAY=:0"],
+    "settings": {
+		"terminal.integrated.shell.linux": "/bin/bash",
+		"python.pythonPath": "/opt/conda/envs/placecoding/bin/python",
+		"python.formatting.provider": "black",
+		"python.linting.enabled": true,
+		"python.linting.flake8Enabled": true,
+		"python.defaultInterpreterPath": "/opt/conda/envs/placecoding/bin/python"
+	},
+    "extensions": [
+                "ms-python.python",
+				"ms-python.vscode-pylance",
+                "ms-toolsai.jupyter"
+            ]
+}

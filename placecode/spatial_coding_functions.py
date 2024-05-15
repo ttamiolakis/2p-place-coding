@@ -3,6 +3,37 @@ import numpy as np
 import pandas as pd
 from scipy.signal import find_peaks
 import scipy.sparse
+from typing import Tuple
+from numpy.typing import ArrayLike
+
+
+def vector_sum(radii: ArrayLike, angles: ArrayLike) -> Tuple[float, float]:
+    """Given an 1D array of vector lengths and an 1D array of corresponding radian angles,
+    return the vectorial sum as a tuple (radius, radian angle).
+
+    Parameters
+    ----------
+    angles : np.array
+        An 1D array of angles (radian).
+    radii : np.array
+        An 1D array of vector lengths.
+    Returns
+    -------
+    tuple(float, float)
+        The radius and angle of the sum vector.
+    Raises
+    -------
+    ValueError: if input parameters are invalid
+    """
+    if len(angles) != len(radii):  # passed arrays of different lenghts, or both empty
+        raise ValueError(f"Shape of angles and radii do not match.")
+    elif len(angles) == 0:
+        raise ValueError(f"Empty input arrays detected.")
+    x = np.sum(radii*np.cos(angles))  # sum up x components
+    y = np.sum(radii*np.sin(angles))
+    angle = np.arctan2(y, x)
+    radius = np.sqrt(x**2 + y**2)
+    return (radius, angle)
 
 
 def event_numbers(data, threshold, max_distance):
@@ -83,6 +114,46 @@ def firing_rate_map(unit_traces: np.array, lv_rounds: np.array, lv_distance: np.
             firing_rate_maps[i_unit, i_round, :] = avg_firing_rate_map
     return firing_rate_maps
 
+
+def spiking_rate_map(binary_traces: np.array, lv_rounds: np.array, lv_distance: np.array, n_bins: int) -> np.array:
+    """Calculates the spatial firing rate map for an arbitrary trace.
+    Parameters
+    ----------
+    binary_traces : np.array(shape=(n_cells, n_frames))
+        A numpy array of 1D binary traces (1 if a firing occurs, 0 otherwise)
+    lv_rounds : np.array(shape=(n_frames,), dtype=np.int16)
+        1D numpy array that marks the number of finished rounds for each frame
+    lv_distance : np.array(shape=(n_frames,), dtype=np.float64)
+        1D numpy array of the distance per round quantity.
+    n_bins : int
+        the number of spatial bins to calculate
+    Returns
+    -------
+    np.array(shape=(n_components, n_rounds, n_bins))
+        A 3D array that contains for each component, for each round, the firing rate corresponding to each spatial bin.
+    """
+    assert binary_traces.shape[1] == len(lv_rounds)
+    assert len(lv_rounds) == len(lv_distance)
+
+    n_units = binary_traces.shape[0]
+    # get all unique rounds included in the data
+    rounds_to_include = np.unique(lv_rounds)
+    n_rounds = len(rounds_to_include)
+
+    firing_rate_maps = np.zeros(
+        shape=(n_units, n_rounds, n_bins), dtype=np.float64)
+    for i_round, round in enumerate(rounds_to_include):
+        # filter traces to current round
+        frames_current_round = lv_rounds == round
+        distance_current_round = lv_distance[frames_current_round]
+        traces_current_round = binary_traces[:, frames_current_round]
+        for i_unit in range(n_units):
+            idx_firing = np.nonzero(traces_current_round[i_unit])
+            firing_spots = distance_current_round[idx_firing]
+            firing_rate_hist, _ = np.histogram(
+                firing_spots, bins=n_bins, range=(0, 1500.))
+            firing_rate_maps[i_unit, i_round, :] = firing_rate_hist
+    return firing_rate_maps
 # taking the zscore flurorescence. finding the peaks in it and making a binary panda frame out of it.
 # meaning with 0 and 1. zero is events and 1 is events
 
@@ -173,8 +244,8 @@ def read_spatial(A_data, A_indices, A_indptr, A_shape, n_components, resolution,
         left as 1d/flat numpy arrays.
     Returns
     -------
-    np.array of shape (n_components, resolution_x * resolution_y ) if unflatten=False, else (n_components, *resolution) 
-        The dense matrix form of the spatial components. 
+    np.array of shape (n_components, resolution_x * resolution_y ) if unflatten=False, else (n_components, *resolution)
+        The dense matrix form of the spatial components.
     """
     spatial = scipy.sparse.csc.csc_matrix(
         (A_data, A_indices, A_indptr), shape=A_shape).todense()  # returns array with dimensions (flat resolution, n_components)
@@ -185,6 +256,28 @@ def read_spatial(A_data, A_indices, A_indptr, A_shape, n_components, resolution,
         # TODO: need to test if x and y are in correct order (for asymmetric resolution).
         spatial = np.reshape(spatial, (n_components, *resolution))
     return spatial
+
+
+def filter_event_count(binary_events: np.array, n_events_threshold: int) -> np.array:
+    """Get the indices of units in binary_events that showed events > n_events_threshold. 
+    Parameters
+    ----------
+    binary_events : np.array(shape=(n_units, n_rounds_used, n_bins))
+        a 3D numpy array containing binary firing count per cell per round per spatial bin
+    n_events_threshold : int
+        The number of firing events over the whole data one cell must strictly exceed to be accepted. 
+
+    Returns
+    -------
+    np.array(shape=(variable, ))
+    a 1D numpy array containing the indices of binary_events first axis that pass the threshold. 
+
+    """
+    # sum binary events over all rounds and all bins for each cell, compare to threshold
+    # boolean array of shape (n_units, )
+    cells_with_many_events = np.sum(
+        binary_events, axis=(1, 2)) > n_events_threshold
+    return np.where(cells_with_many_events)
 
 
 def cell_morphology(dataset):
