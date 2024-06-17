@@ -10,6 +10,10 @@ from uuid import uuid4
 class ParameterNotFoundError(Exception):
     pass
 
+class MultipleFilesFoundError(Exception):
+    """Exception raised for finding multiple files where only one was expected."""
+    pass
+
 
 class ExpInfo():
     # TODO add proper documentation
