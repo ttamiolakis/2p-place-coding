@@ -1,0 +1,22 @@
+name: placecoding
+channels:
+  - anaconda
+  - bokeh
+  - conda-forge
+  - menpo
+  - defaults
+dependencies: # only manually specify important packages to maintain cross-platform capability.
+  - bokeh=3.4.1
+  - h5py=3.11.0
+  - hdf5=1.14.3
+  - imageio=2.34.1
+  - ipykernel
+  - ipywidgets
+  - matplotlib=3.8.4
+  - numpy=1.26.4
+  - pandas=2.2.2
+  - pillow=10.2.0
+  - pip=24.0
+  - python=3.11.8
+  - scipy=1.13.0
+  - seaborn=0.12.2
