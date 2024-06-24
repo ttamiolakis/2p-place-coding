@@ -186,20 +186,20 @@ def adding_parameters(zscore_fluo_pd, raw_fluo_pd, param_file):
     time_hdf = pd.DataFrame(time_hdf)
     time_hdf.columns = ['Time (ms)']
     # panda frame for distance
-    distance_hdf = h5py.File(param_file)['inferred']['belt_scn_df']['distance']
+    distance_hdf = h5py.File(param_file)['inferred']['belt_scn_dict']['distance']
     distance_hdf = pd.DataFrame(distance_hdf)
     distance_hdf.columns = ['Distance']
     # panda frame for speed
-    speed_hdf = h5py.File(param_file)['inferred']['belt_scn_df']['speed']
+    speed_hdf = h5py.File(param_file)['inferred']['belt_scn_dict']['speed']
     speed_hdf = pd.DataFrame(speed_hdf)
     speed_hdf.columns = ['Speed']
     # panda frame for number of rounds
-    rounds_hdf = h5py.File(param_file)['inferred']['belt_scn_df']['rounds']
+    rounds_hdf = h5py.File(param_file)['inferred']['belt_scn_dict']['rounds']
     rounds_hdf = pd.DataFrame(rounds_hdf)
     rounds_hdf.columns = ['Rounds']
     rounds_hdf = rounds_hdf.astype(int)
     # panda frame for running(yes or no running)
-    running_hdf = h5py.File(param_file)['inferred']['belt_scn_df']['running']
+    running_hdf = h5py.File(param_file)['inferred']['belt_scn_dict']['running']
     running_hdf = pd.DataFrame(running_hdf)
     running_hdf.columns = ['Running']
     running_hdf = running_hdf.astype(int)

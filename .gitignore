@@ -3,4 +3,5 @@ __pycache__/
 *.py[cod]
 
 data/input_data.json
+run_analysis.ipynb
 .venv
