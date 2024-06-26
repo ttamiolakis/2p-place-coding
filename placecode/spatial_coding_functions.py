@@ -294,6 +294,7 @@ def cell_morphology(dataset):
             (A_data, A_indices, A_indptr), shape=A_shape).todense()
         spatial = np.array(spatial)  # change type to numpy array
         # spatial = np.reshape(spatial[:,cell_number], (512, 512)) # (262144 -> 512x512, i.e. "unflatten")
+        spatial=np.reshape(spatial, (512, 512, n_neurons))
         return spatial
 
 
