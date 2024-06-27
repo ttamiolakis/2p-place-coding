@@ -43,7 +43,7 @@ def event_numbers(data, threshold, max_distance):
 
 def make_firing_rate_maps(data,rounds, num_units, num_bins):
     # Initialize a 3-dimensional array to store firing rate maps for each cell and round
-    firing_rate_maps = np.zeros((int(num_units), rounds, num_bins))
+    firing_rate_maps = np.zeros((int(num_units), len(rounds), num_bins))
 
     for cell in range(num_units):        
         for round_num in rounds:
