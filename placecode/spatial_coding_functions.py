@@ -45,8 +45,7 @@ def make_firing_rate_maps(data,rounds, num_units, num_bins):
     # Initialize a 3-dimensional array to store firing rate maps for each cell and round
     firing_rate_maps = np.zeros((int(num_units), rounds, num_bins))
 
-    for cell in range(num_units):
-        # FIXME: can speed up if filtering for round happens first. Right now, same filtering for round is done for each cell
+    for cell in range(num_units):        
         for round_num in rounds:
             # Filter data for the current round and cell
             round_data = data[data['Rounds'] == round_num]
@@ -165,7 +164,7 @@ def spiking_rate_map(binary_traces: np.array, lv_rounds: np.array, lv_distance: 
 #         return data_binarized
 
 
-def make_binary(data, peak_threshold=3, peak_distance=10):
+def make_binary(data, peak_threshold, peak_distance):
     # the data file will be the the firing rate map of every cell
     data_binarized = np.zeros_like(data)  # making a copy of the original file
     # iterating through cells
