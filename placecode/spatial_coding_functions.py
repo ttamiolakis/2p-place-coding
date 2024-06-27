@@ -41,14 +41,13 @@ def event_numbers(data, threshold, max_distance):
     return data.iloc[peaks]
 
 
-def make_firing_rate_maps(data, num_rounds, num_units, num_bins):
+def make_firing_rate_maps(data,rounds, num_units, num_bins):
     # Initialize a 3-dimensional array to store firing rate maps for each cell and round
-    firing_rate_maps = np.zeros((int(num_units), num_rounds, num_bins))
+    firing_rate_maps = np.zeros((int(num_units), rounds, num_bins))
 
     for cell in range(num_units):
-        # FIXME: what if, for example, rounds 0, 1, 3, 4 are included, and round 2 was filtered out?
         # FIXME: can speed up if filtering for round happens first. Right now, same filtering for round is done for each cell
-        for round_num in range(1, num_rounds + 1):
+        for round_num in rounds:
             # Filter data for the current round and cell
             round_data = data[data['Rounds'] == round_num]
 
