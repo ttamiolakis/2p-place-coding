@@ -46,7 +46,7 @@ def make_firing_rate_maps(data,rounds, num_units, num_bins):
     firing_rate_maps = np.zeros((int(num_units), len(rounds), num_bins))
 
     for cell in range(num_units):        
-        for round_num in rounds:
+        for i,round_num in enumerate(rounds):
             # Filter data for the current round and cell
             round_data = data[data['Rounds'] == round_num]
 
@@ -63,7 +63,9 @@ def make_firing_rate_maps(data,rounds, num_units, num_bins):
             avg_firing_rate_map[np.isnan(avg_firing_rate_map)] = 0
 
             # Store the average firing rate map in the firing_rate_maps array
-            firing_rate_maps[cell, round_num - 1] = avg_firing_rate_map
+            firing_rate_maps[cell, i - 1] = avg_firing_rate_map 
+            #change it to i-1 and not round -1 because thre is an issue in case of rounds 1,2,3,5 
+            #epty round creates an issue
 
     return firing_rate_maps
 
