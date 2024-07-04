@@ -17,12 +17,12 @@ class TunedVector:
         x_coords = []
         y_coords = []
 
-        for i,events_rounds in enumerate(data):
+        for i,events_rounds in enumerate(data,angles):
             event_angles = angles[np.where(events_round == 1)]
             event_radii = np.ones_like(event_angles) * (i + 1)  # Adjust the radius for each round
             x_coords.extend(np.cos(event_angles)/(i + 1))
             y_coords.extend(np.sin(event_angles)/(i + 1))
-            
+
         return x_coords,y_coords
 
 
