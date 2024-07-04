@@ -47,36 +47,6 @@ class KstestPlaceCells:
         data_shuffle_avg=np.mean(data_shuffle,axis=0)
 
         return data_shuffle_avg
-    
-    def shuffled_ks(data,num_rounds,shuffling_times,shuf_distance):
-        for n in range(shuffling_times):
-
-        data_shuffle=data.copy()
-        for i in range(num_rounds):
-            shuf=random.randit(1,shuf_distance)
-            data_shuffle[i]=np.roll(data_shuffle[i],shuf)
-
-
-    
-    baseline_ks,_=kstest(data_avg,baseline_avg)
-
-
-    # now I will shuffle many times and then compare
-        
-    for n in range(1,shuffling_times):
-        data_shuffle=data.copy()    
-        for i in range(num_rounds):
-            shuf=random.randint(1,150)
-            data_shuffle[i]=np.roll(data_shuffle[i],shuf)
-        
-        
-
-        data_shuffle=np.mean(data_shuffle,axis=0)
-        ks_shuffle,p_value_=kstest(baseline_avg,data_shuffle)
-        shuffled_ks.append(ks_shuffle)
-
-
-
 
 
 def event_numbers(data, threshold, max_distance):
