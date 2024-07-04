@@ -7,33 +7,25 @@ from typing import Tuple
 from numpy.typing import ArrayLike
 
 
-def vector_sum(radii: ArrayLike, angles: ArrayLike) -> Tuple[float, float]:
-    """Given an 1D array of vector lengths and an 1D array of corresponding radian angles,
-    return the vectorial sum as a tuple (radius, radian angle).
+class TunedVector:
+    def __init__(self):
+        pass
 
-    Parameters
-    ----------
-    angles : np.array
-        An 1D array of angles (radian).
-    radii : np.array
-        An 1D array of vector lengths.
-    Returns
-    -------
-    tuple(float, float)
-        The radius and angle of the sum vector.
-    Raises
-    -------
-    ValueError: if input parameters are invalid
-    """
-    if len(angles) != len(radii):  # passed arrays of different lenghts, or both empty
-        raise ValueError(f"Shape of angles and radii do not match.")
-    elif len(angles) == 0:
-        raise ValueError(f"Empty input arrays detected.")
-    x = np.sum(radii*np.cos(angles))  # sum up x components
-    y = np.sum(radii*np.sin(angles))
-    angle = np.arctan2(y, x)
-    radius = np.sqrt(x**2 + y**2)
-    return (radius, angle)
+    def calculate_coordinates(data):
+        # Calculate average direction using Cartesian coordinates
+
+        x_coords = []
+        y_coords = []
+
+        for i,events_rounds in enumerate(data):
+            event_angles = angles[np.where(events_round == 1)]
+            event_radii = np.ones_like(event_angles) * (i + 1)  # Adjust the radius for each round
+            x_coords.extend(np.cos(event_angles)/(i + 1))
+            y_coords.extend(np.sin(event_angles)/(i + 1))
+            
+        return x_coords,y_coords
+
+
 
 
 def event_numbers(data, threshold, max_distance):
