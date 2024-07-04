@@ -22,6 +22,18 @@ class TunedVector:
             y_coords.extend(np.sin(event_angles)/(i + 1))
 
         return x_coords,y_coords
+    
+    def calculate_avr_vector(x,y,avr_factor):
+        # Sum the coordinates . I divide it with number of events. instead of number of rounds MAYBE THIS WOULD NEED TO CHANGE
+        sum_x = np.sum(x)/ avr_factor
+        sum_y = np.sum(y)/ avr_factor
+
+        # Convert the sum of coordinates to polar coordinates
+        sum_direction = np.arctan2(sum_y, sum_x)  # Note: y comes before x in arctan2
+        sum_magnitude = np.sqrt(sum_x**2 + sum_y**2)
+
+        return sum_direction,sum_magnitude
+
 
 
 
