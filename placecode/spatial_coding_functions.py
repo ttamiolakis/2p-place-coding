@@ -11,13 +11,11 @@ class TunedVector:
     def __init__(self):
         pass
 
-    def calculate_coordinates(data):
+    def calculate_coordinates(data,angles):
         # Calculate average direction using Cartesian coordinates
-
         x_coords = []
         y_coords = []
-
-        for i,events_rounds in enumerate(data,angles):
+        for i,events_round in enumerate(data):
             event_angles = angles[np.where(events_round == 1)]
             event_radii = np.ones_like(event_angles) * (i + 1)  # Adjust the radius for each round
             x_coords.extend(np.cos(event_angles)/(i + 1))
