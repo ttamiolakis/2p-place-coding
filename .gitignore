@@ -3,5 +3,6 @@ __pycache__/
 *.py[cod]
 
 data/input_data.json
-run_analysis.ipynb
+run_cross_reg_analysis.ipynb
+run_spatial_coding_analysis
 .venv

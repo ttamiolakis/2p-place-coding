@@ -22,9 +22,9 @@ class CellTrackingSingleAnimal:
         if not sessions:
             return df  # Return the original DataFrame if no sessions are specified
         
-        mask = df[sessions[0]].isin(place_cell_arrays[sessions[0]][0])
+        mask = df[sessions[0]].isin(place_cell_arrays[sessions[0]])
         for session in sessions[1:]:
-            mask &= df[session].isin(place_cell_arrays[session][0])
+            mask &= df[session].isin(place_cell_arrays[sessions[0]])
         
         filtered_df = df[mask]
         return filtered_df[sessions]
@@ -46,8 +46,8 @@ class CellTrackingSingleAnimal:
         
         '''
         
-        mask = df[source_condition].isin(source_type[source_condition][0])
-        mask &= df[targ_condition].isin(target_type[targ_condition][0])
+        mask = df[source_condition].isin(source_type[source_condition])
+        mask &= df[targ_condition].isin(target_type[targ_condition])
 
         filtered_df = df[mask]
         return filtered_df[[source_condition,targ_condition]]
@@ -69,6 +69,29 @@ class CellTrackingSingleAnimal:
 
         return angle_between_lines
     
+    def isolating_cell_type(file,cell_type):
+
+        '''
+        isolating specific cell type from a specfic file
+         Parameters:
+        file (str): The path to the HDF5 file.
+        cell_type (str): The dataset name corresponding to the cell type.
+
+        Returns:
+        np.ndarray: An array of the specified cell type per day.
+
+        '''  
+
+        with h5py.File(file, 'r') as f:
+            cell_type_per_day = f[cell_type][:]
+        return np.array(cell_type_per_day)
+        # cell_type_per_day=h5py.File(file[cell_type])
+        # cells_per_day=np.array(cell_type_per_day)
+        # return cells_per_day
+
+
+
+
 
 class CellTrackingMultipleAnimals:
     def _init_(self):
